@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import ru.mokrovitskii.springsecuritydemo.model.Permission;
 import ru.mokrovitskii.springsecuritydemo.model.Role;
 
 @Configuration
@@ -26,9 +27,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         (auth) ->
                                 auth
-                                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole(Role.ADMIN.name(), Role.USER.name())
-                                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole(Role.ADMIN.name())
-                                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyRole(Role.ADMIN.name())
+                                        .requestMatchers(HttpMethod.GET, "/api/**").hasAuthority(Permission.DEVELOPERS_READ.getPermission())
+                                        .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority(Permission.DEVELOPERS_WRITE.getPermission())
+                                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAuthority(Permission.DEVELOPERS_WRITE.getPermission())
                                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -41,12 +42,12 @@ public class SecurityConfig {
                 User.builder()
                         .username("admin")
                         .password(passwordEncoder().encode("admin"))
-                        .roles(Role.ADMIN.name())
+                        .authorities(Role.ADMIN.getAuthorities())
                         .build(),
                 User.builder()
                         .username("user")
                         .password(passwordEncoder().encode("user"))
-                        .roles(Role.USER.name())
+                        .authorities(Role.USER.getAuthorities())
                         .build());
     }
 
